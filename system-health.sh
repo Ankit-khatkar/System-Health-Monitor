@@ -48,3 +48,49 @@ if [ $(echo "$load_avg_1m >= $processors" | bc -l) -eq 1 ] || \
 else
         echo "CPU has free capacity"
 fi
+
+echo
+echo "🧮 2. Memory (RAM Health)"
+
+TotalMEM=$(top -bn1 | grep "MiB Mem :" | awk '{print $4}')
+FreeMEM=$(top -bn1 | grep "MiB Mem :" | awk '{print $6}')
+echo
+echo "Total Memory: $TotalMEM"
+echo "Free Memory: $FreeMEM"
+
+#Percentage use of memory
+
+PUse=$(echo "scale=2; ($FreeMEM / $TotalMEM)*100" | bc)
+
+echo "Your $PUse % memory is free"
+echo
+
+
+echo "💾 3. Disk (Storage Health)"
+echo
+count=0
+Warning=90
+MaxP=100
+
+while read filesystem size used avail use mounted; do
+
+use_val=${use%\%}
+if [ "$use_val" -gt "$Warning" ] && [ "$use_val" -lt "$MaxP" ]; then
+        echo "Filesystem: $filesystem"
+        echo "Mounted on: $mounted"
+        echo "⚠︎  WARNING: Disk usage is above 90%."
+        ((count++))
+        echo
+elif [ "$use_val" -gt "$MaxP" ]; then
+        echo "Filesystem: $filesystem"
+        echo "Mounted on: $mounted"
+        echo "🚨 CRITICAL: Disk full! Please take immediate action."
+        ((count++))
+fi
+done < <(df -h | awk 'NR>1')
+
+if [ "$count" -eq 0 ]; then
+    echo "✅ Everything is fine. Disk usage is normal."
+else
+    echo "Total issues detected: $count"
+fi
