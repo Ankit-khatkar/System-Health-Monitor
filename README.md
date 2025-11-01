@@ -29,7 +29,7 @@ The script collects system data using tools like:
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/your-username/system-health-monitor-bash.git
+git clone https://github.com/your-username/system-health-monitor.git
 cd system-health-monitor
 
 
